@@ -9,7 +9,8 @@
 import numpy as np
 
 # 기울기 a와 y 절편 b
-fake_a_b = [3, 76]
+# fake_a_b = [3, 76]
+fake_a_b = [2.3, 79]
 
 # x, y의 데이터 값
 data = [[2, 81], [4, 93], [6, 91], [8, 97]]
