@@ -36,7 +36,40 @@ plt.figure(figsize=(8, 5))
 plt.scatter(x, y)
 plt.show()
 
+# 리스트로 되어 있는 x와 y값을 넘파이 배열로 바꾸기 ( 인덱스를 주어 하나씩 불러와 계산이 가능하게 하기 위함 )
+x_data = np.array(x)
+y_data = np.array(y)
 
+# 기울기 a와 절편 b의 값 초기화
+a = 0
+b = 0
+
+# 학습률 정하기
+lr = 0.03
+
+# 몇 번 반복 학습할건지 설정
+epochs = 2001 # 2001번 반복 학습
+
+# 경사 하강법 시작
+for i in range(epochs): # 에포크 수만큼 반복 
+    y_pred = a * x_data + b # y를 구하는 식 세우기 (y = ax + b)
+    error = y_data - y_pred # 예측값 - 실제값을 통해 오차를 구하는 식 ( y_data: 실제 점수값, y_pred: 위의 식을 통해 도출된 예측값)
+    # 오차 함수를 a로 미분한 값
+    a_diff = -(2/len(x_data)) * sum(x_data * (error))
+    # 오차 함수를 b로 미분한 값
+    b_diff = -(2/len(x_data)) * sum(error)
+
+    a = a - lr * a_diff # 학습률을 곱해 기존의 a값 업데이트
+    b = b - lr * b_diff # 학습률을 곱해 기존의 b값 업데이트
+
+    if (i % 100) == 0: # 100번 학습할 때마다 현재의 예측값 출력
+        print("[학습량]=%.f, [기울기]=%.04f, [y절편]=%.04f" % (i, a, b))
+
+# 최종적으로 학습한 기울기와 절편을 이용한 예측 그래프 그리기
+y_pred = a * x_data + b
+plt.scatter(x, y)
+plt.plot([min(x_data), max(x_data)], [min(y_pred), max(y_pred)])
+plt.show() 
 
 
 
