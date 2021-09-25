@@ -25,7 +25,6 @@ lr = 0.05
 # 시그모이드 함수 정의
 def sigmoid(x):
     return 1 / (1 + np.e ** (-x))
-
 # 경사 하강법 실행
 # 1,000번 반복될 때마다 각 x_data 값에 대한 현재의 a 값, b 값 출력
 for i in range(2001):
