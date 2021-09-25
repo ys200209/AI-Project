@@ -52,6 +52,8 @@ for i in range(epochs):
     if (i % 100) == 0:
         print("[학습량]=%.f, [기울기1]=%.04f, [기울기2]=%.04f [y절편]=%.04f" % (i, a1, a2, b)) 
 
+'''
 ax.scatter(x1, x2, y)
 #plt.plot([min(x1_data), max(x1_data)], [min(x2_data), max(x2_data)], [min(y_pred), max(y_pred)])
 plt.show() 
+'''
