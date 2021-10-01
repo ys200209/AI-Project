@@ -29,6 +29,7 @@ model.add(Dense(1)) # 선형함수는 출력층에 활성화함수를 입력하�
 model.compile(loss="mean_squared_error", optimizer="adam")
 model.fit(X_train, Y_train, epochs=200, batch_size=10)
 
+
 # 예측 값과 실제 값의 비교
 Y_prediction = model.predict(X_test).flatten()
 for i in range(10):
