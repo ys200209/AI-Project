@@ -21,6 +21,8 @@ e = LabelEncoder()
 e.fit(Y_obj)
 Y = e.transform(Y_obj)
 
+print("Y = ", Y)
+'''
 # 학습셋과 테스트셋의 구분
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_state=seed)
 
@@ -39,3 +41,4 @@ model.fit(X_train, Y_train, epochs=130, batch_size=5) # 5개의 샘플을 비교
 print("\n Test Accuracy: %.04f" % (model.evaluate(X_test, Y_test)[1]))
 
 model.save('my_model.h5')
+'''
