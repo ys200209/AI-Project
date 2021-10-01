@@ -90,11 +90,14 @@ print('결정계수1 : ', model_score1)
 print("모델2 트리 수 : ", model_score2_index)
 print('결정계수2 : ', model_score2)
 
-model1 = RandomForestRegressor(n_jobs=-1, random_state=42) # 파라미터 여부 n_estimators = 239
-model2 = RandomForestRegressor(n_jobs=-1, random_state=42) # 파라미터 여부 n_estimators = 252
+model1 = RandomForestRegressor(n_estimators = 239, n_jobs=-1, random_state=42, criterion='mae') # 파라미터 여부 n_estimators = 239
+model2 = RandomForestRegressor(n_estimators = 252, n_jobs=-1, random_state=42, criterion='mae') # 파라미터 여부 n_estimators = 252
 
 model1.fit(x_train, y1_train)
 model2.fit(x_train, y2_train)
+
+print("model1.feature_importances_ : ", model1.feature_importances_)
+print("model2.feature_importances_ : ", model2.feature_importances_)
 
 pred1 = model1.predict(x_test)
 pred2 = model2.predict(x_test)
