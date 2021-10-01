@@ -86,26 +86,48 @@ daily_lunch = []
 
 
 # 일일 메뉴에서 ( 원산지 )와 공백을 제거한 순수 메뉴 리스트
-for i in range(len(train)):
+'''
+for i in range(3):
     menu = train['중식메뉴'][i]
     
     menu = re.sub(r"\([^)]*\)", '', menu)
     daily_lunch = menu.split()
 
     lunch.append(daily_lunch)
+'''
+
+for i in train['중식메뉴']:
+    
+    menu = re.sub(r"\([^)]*\)", '', i)
+    daily_lunch = menu.split()
+    lunch.append(daily_lunch)
+
+# print("lunch = ", lunch)
 
 
-print("lunch = ", lunch)
-
+print("lunch.size = ", len(lunch[0]))
+print("side_menu1.size = ", len(lunch[1]))
+print("side_menu2.size = ", len(lunch[2]))
+print("side_menu3.size = ", len(lunch[3]))
+print("side_menu4.size = ", len(lunch[4]))
+print("side_menu5.size = ", len(lunch[5]))
+print("side_menu6.size = ", len(lunch[6]))
 
 
 rice = [i[0] for i in lunch]
+# print("rice... ===== ", rice)
+
+for i in lunch:
+    print("side_menu5.size = ", len(lunch[5]))
+
+
 side_menu1 = [i[1] for i in lunch]
 side_menu2 = [i[2] for i in lunch]
 side_menu3 = [i[3] for i in lunch]
 side_menu4 = [i[4] for i in lunch]
-side_menu5 = [i[5] for i in lunch]
+# side_menu5 = [i[5] for i in lunch]
 side_menu6 = [i[6] for i in lunch]
+
 
 '''
 print("rice... : ", rice)
@@ -123,7 +145,7 @@ Y = e.transform(rice)
 print("Encoding : rice = ", Y)
 
 e = e.fit(side_menu1)
-Y = e.transform(side_menu1)
+side_menu1 = e.transform(side_menu1)
 #print("Encoding : side_menu1 = ", Y)
 
 e = e.fit(side_menu2)
@@ -157,5 +179,14 @@ Y = e.transform(side_menu6)
 # menu = text_to_word_sequence(menu)
 # print("menu2 = ", menu)
 
+dataFrame_lunch = pd.DataFrame({
+    'rice':rice,
+    'side_menu1':side_menu1,
+    'side_menu2':side_menu2,
+    'side_menu3':side_menu3,
+    'side_menu4':side_menu4,
+    'side_menu5':side_menu5,
+    'side_menu6':side_menu6
+})
 
-
+dataFrame_lunch.to_csv('./경진대회/data/lunch.csv', index=False)
