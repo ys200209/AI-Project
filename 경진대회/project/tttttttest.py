@@ -15,18 +15,24 @@ train = pd.read_csv('./경진대회/data/train.csv')
 test = pd.read_csv('./경진대회/data/test.csv')
 submission = pd.read_csv('./경진대회/data/sample_submission.csv')
 
+
+
+# train['요일'] = train['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
+print(pd.get_dummies(train, columns = ['요일']))
+
+train = pd.get_dummies(train, columns = ['요일'])
+# test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
+
+test = pd.get_dummies(test, columns = ['요일'])
 print(train.info())
+print(train.head(10))
 
-train['요일'] = train['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
-test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
-
-x_train = train[['요일', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_train = train[['요일_월', '요일_화', '요일_수', '요일_목', '요일_금', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 y1_train = train['중식계']
 y2_train = train['석식계']
 
-x_test = test[['요일', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_test = test[['요일_월', '요일_화', '요일_수', '요일_목', '요일_금', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 
-print(x_train.head(10))
 
 model1 = RandomForestRegressor(n_jobs=-1, random_state=42)
 model2 = RandomForestRegressor(n_jobs=-1, random_state=42)
@@ -45,9 +51,9 @@ submission['석식계'] = pred2
 
 submission.to_csv('./경진대회/data/ttttttttttest.csv', index=False)
 
-x_train['요일'] = pd.get_dummies(x_train['요일'])
+# x_train['요일'] = pd.get_dummies(x_train['요일'])
 
-print("['요일'] = ", x_train['요일'])
+
 
 # ttttttttttest = pd.read_csv('./경진대회/data/ttttttttttest.csv')
 
