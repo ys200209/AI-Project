@@ -52,15 +52,16 @@ print(submission.info())
 '''model = RandomForestRegressor(n_jobs=-1, random_state=42)
 model.fit'''
 
-train['요일'] = train['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
-test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
+# train['요일'] = train['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
+# test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
 
+train = pd.get_dummies(train, columns = ['요일'])
+test = pd.get_dummies(test, columns = ['요일'])
 
-x_train = train[['요일', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_train = train[['요일_월', '요일_화', '요일_수', '요일_목', '요일_금', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 y1_train = train['중식계']
 y2_train = train['석식계']
-
-x_test = test[['요일', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_test = test[['요일_월', '요일_화', '요일_수', '요일_목', '요일_금', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 
 model_score1 = 0
 model_score1_index = 0
