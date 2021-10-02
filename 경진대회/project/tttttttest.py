@@ -45,6 +45,10 @@ submission['석식계'] = pred2
 
 submission.to_csv('./경진대회/data/ttttttttttest.csv', index=False)
 
+x_train['요일'] = pd.get_dummies(x_train['요일'])
+
+print("['요일'] = ", x_train['요일'])
+
 # ttttttttttest = pd.read_csv('./경진대회/data/ttttttttttest.csv')
 
 '''
@@ -104,7 +108,7 @@ for i in train['중식메뉴']:
 
 # print("lunch = ", lunch)
 
-
+'''
 print("lunch.size = ", len(lunch[0]))
 print("side_menu1.size = ", len(lunch[1]))
 print("side_menu2.size = ", len(lunch[2]))
@@ -127,7 +131,7 @@ side_menu3 = [i[3] for i in lunch]
 side_menu4 = [i[4] for i in lunch]
 # side_menu5 = [i[5] for i in lunch]
 side_menu6 = [i[6] for i in lunch]
-
+'''
 
 '''
 print("rice... : ", rice)
@@ -137,7 +141,7 @@ print("side_menu3... : ", side_menu3)
 print("side_menu4... : ", side_menu4)
 print("side_menu5... : ", side_menu5)
 print("side_menu6... : ", side_menu6)
-'''
+
 
 e = LabelEncoder()
 e = e.fit(rice)
@@ -166,19 +170,20 @@ Y = e.transform(side_menu5)
 
 e = e.fit(side_menu6)
 Y = e.transform(side_menu6)
+'''
 #print("Encoding : side_menu6 = ", Y)
 
 # 이제 구별은 할 수 있게 되었지만, 관건은 0~n까지의 수로 구분되어 있는 이 데이터를
 # '숫자의 크기' 로 평가하는것이 아닌, 음식을 '구분' 하는 용도로 사용할 수 있는가.. 이다.
 
-
+# '요일' 을 숫자로 매핑하지 말고 '원 핫 인코딩' 기법으로 변환 시킨 뒤 학습
 
 
 
 #menu = train['중식메뉴'][0]
 # menu = text_to_word_sequence(menu)
 # print("menu2 = ", menu)
-
+'''
 dataFrame_lunch = pd.DataFrame({
     'rice':rice,
     'side_menu1':side_menu1,
@@ -188,5 +193,5 @@ dataFrame_lunch = pd.DataFrame({
     'side_menu5':side_menu5,
     'side_menu6':side_menu6
 })
-
+'''
 dataFrame_lunch.to_csv('./경진대회/data/lunch.csv', index=False)
