@@ -2,11 +2,11 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestRegressor  
 
-
-
-import seaborn as sns
-import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 from matplotlib import font_manager, rc
+from sklearn.model_selection import train_test_split
+
 
 # train = pd.read_csv('C:\\Users\\Lee\\Desktop\\AI 응용 프로젝트\\경진대회\\data\\train.csv')
 train = pd.read_csv('./경진대회/data/train.csv')
@@ -49,89 +49,48 @@ print(submission.info())
 
 # plt.show()
 
-'''model = RandomForestRegressor(n_jobs=-1, random_state=42)
-model.fit'''
-
-# train['요일'] = train['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
-# test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
+train['요일'] = train['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
+test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
 
 train = pd.get_dummies(train, columns = ['요일'])
 test = pd.get_dummies(test, columns = ['요일'])
 
-x_train = train[['요일_월', '요일_화', '요일_수', '요일_목', '요일_금', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+print("train = ", train)
+
+x_train = train[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 y1_train = train['중식계']
 y2_train = train['석식계']
-x_test = test[['요일_월', '요일_화', '요일_수', '요일_목', '요일_금', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_test = test[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 
-model_score1 = 0
-model_score1_index = 0
-model_score2 = 0
-model_score2_index = 0
+model1 = RandomForestRegressor(n_jobs=-1, random_state=42, criterion="mae")
+model2 = RandomForestRegressor(n_jobs=-1, random_state=42, criterion="mae")
 
-'''
-for i in range(230, 330):
-    print("i = ", i)
-    model1 = RandomForestRegressor(n_estimators = i, n_jobs=-1, random_state=42)
-    model2 = RandomForestRegressor(n_estimators = i, n_jobs=-1, random_state=42)
+# lunch에 대한 예측값
+x_train, x_test, y_train, y_test = train_test_split(x_train, y1_train, test_size=0.3, random_state=42)
 
-    model1.fit(x_train, y1_train)
-    model2.fit(x_train, y2_train)
+model1.fit(x_train, y_train)
+# model2.fit(x_train, y2_train)
 
-    if (model_score1 < model1.score(x_train, y1_train)):
-        model_score1 = model1.score(x_train, y1_train)
-        model_score1_index = i
-
-    if (model_score2 < model2.score(x_train, y2_train)):
-        model_score2 = model2.score(x_train, y2_train)
-        model_score2_index = i
-'''
-    
-print("모델1 트리 수 : ", model_score1_index)
-print('결정계수1 : ', model_score1)
-print("모델2 트리 수 : ", model_score2_index)
-print('결정계수2 : ', model_score2)
-
-model1 = RandomForestRegressor(n_estimators = 239, n_jobs=-1, random_state=42, criterion='mae') # 파라미터 여부 n_estimators = 239
-model2 = RandomForestRegressor(n_estimators = 252, n_jobs=-1, random_state=42, criterion='mae') # 파라미터 여부 n_estimators = 252
-
-model1.fit(x_train, y1_train)
-model2.fit(x_train, y2_train)
-
-print("model1.feature_importances_ : ", model1.feature_importances_)
-print("model2.feature_importances_ : ", model2.feature_importances_)
 
 pred1 = model1.predict(x_test)
-pred2 = model2.predict(x_test)
-
-print("중식계 pred1 = ", pred1)
-print("석식계 pred2 = ", pred2)
-print("\n------------------------------------------------------------\n")
-
-
-'''
-model1 = RandomForestRegressor(n_estimators = i, n_jobs=-1, random_state=42)
-model2 = RandomForestRegressor(n_estimators = i, n_jobs=-1, random_state=42)
-
-model1.fit(x_train, y1_train)
-model2.fit(x_train, y2_train)
-
-
-relation_square1 = model1.score(x_train, y1_train)
-relation_square2 = model2.score(x_train, y2_train)
-print('결정계수1 : ', relation_square1)
-print('결정계수2 : ', relation_square2)
-'''
+print("lunch = ", model1.score(x_test, y_test))
+# pred2 = model2.predict(x_test)
 
 np.set_printoptions(precision=1)
 pred1 = np.round(model1.predict(x_test), 0)
-pred2 = np.round(model2.predict(x_test), 0)
+# pred2 = np.round(model2.predict(x_test), 0)
+
+'''
+rf_clf = RandomForestClassifier(random_state=0)
+rf_clf.fit(x_train, split_lunch)
+pred = rf_clf.predict(x_test)
+'''
+accuracy = accuracy_score(y_test, pred1)
+print('랜덤 포레스트 정확도: {:.4f}'.format(accuracy))
+
+# submission['중식계'] = pred1
+# submission['석식계'] = pred2
+
+# submission.to_csv('./경진대회/data/baseline.csv', index=False)
 
 
-
-# 현재값을 그래프로 나타내보기
-
-
-submission['중식계'] = pred1
-submission['석식계'] = pred2
-
-submission.to_csv('./경진대회/data/baseline.csv', index=False)
