@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestRegressor  
+from sklearn.ensemble import RandomForestRegressor
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from matplotlib import font_manager, rc
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV
+
 
 
 # train = pd.read_csv('C:\\Users\\Lee\\Desktop\\AI 응용 프로젝트\\경진대회\\data\\train.csv')
@@ -62,35 +64,59 @@ y1_train = train['중식계']
 y2_train = train['석식계']
 x_test = test[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 
-model1 = RandomForestRegressor(n_jobs=-1, random_state=42, criterion="mae")
-model2 = RandomForestRegressor(n_jobs=-1, random_state=42, criterion="mae")
+model1 = RandomForestRegressor(n_estimators=400, max_features=4, n_jobs=-1, random_state=42, criterion='mae')
+model2 = RandomForestRegressor(n_estimators=400, max_features=5, n_jobs=-1, random_state=42, criterion='mae')
 
 # lunch에 대한 예측값
-x_train, x_test, y_train, y_test = train_test_split(x_train, y1_train, test_size=0.3, random_state=42)
+x_train_lunch, x_test_lunch, y_train_lunch, y_test_lunch = train_test_split(x_train, y1_train, test_size=0.35, random_state=42)
 
-model1.fit(x_train, y_train)
-# model2.fit(x_train, y2_train)
+# dinner에 대한 예측값
+x_train_dinner, x_test_dinner, y_train_dinner, y_test_dinner = train_test_split(x_train, y2_train, test_size=0.25, random_state=42)
+
+
+
+model1.fit(x_train_lunch, y_train_lunch)
+model2.fit(x_train_dinner, y_train_dinner)
 
 
 pred1 = model1.predict(x_test)
-print("lunch = ", model1.score(x_test, y_test))
-# pred2 = model2.predict(x_test)
+pred2 = model2.predict(x_test)
+print("lunch = ", model1.score(x_test_lunch, y_test_lunch))
+print("dinner = ", model2.score(x_test_dinner, y_test_dinner))
+
+
+params = {
+    'n_estimators':[100, 200, 300],
+    'max_depth':[2 ,4 ,6, 8, 10, 12],
+    'min_samples_leaf':[2 ,4, 6, 8, 12, 18],
+    'min_samples_split':[2 ,4, 6, 8, 16, 20]
+}
+
+# RandomForestClassifier 객체 생성 후 GridSearchCV 수행
+# n_jobs = -1 을 지정하면 모든 CPU 코어를 이용해 학습 가능
+rf_clf = RandomForestClassifier(n_jobs=-1)
+grid_cv = GridSearchCV(rf_clf, param_grid = params, cv=2, n_jobs=-1)
+grid_cv.fit(x_train_lunch, y_train_lunch)
+
+print('최적의 하이퍼 파라미터 :',grid_cv.best_params_)
+print('최적의 예측 정확도 :',grid_cv.best_score_)
 
 np.set_printoptions(precision=1)
-pred1 = np.round(model1.predict(x_test), 0)
-# pred2 = np.round(model2.predict(x_test), 0)
+pred1 = np.round(pred1, 0)
+pred2 = np.round(pred2, 0)
 
 '''
 rf_clf = RandomForestClassifier(random_state=0)
-rf_clf.fit(x_train, split_lunch)
-pred = rf_clf.predict(x_test)
-'''
-accuracy = accuracy_score(y_test, pred1)
+rf_clf.fit(x_train_lunch, y_train_lunch)
+pred = rf_clf.predict(x_test_lunch)
+
+accuracy = accuracy_score(y_test_lunch, pred)
 print('랜덤 포레스트 정확도: {:.4f}'.format(accuracy))
+'''
 
-# submission['중식계'] = pred1
-# submission['석식계'] = pred2
+submission['중식계'] = pred1
+submission['석식계'] = pred2
 
-# submission.to_csv('./경진대회/data/baseline.csv', index=False)
+submission.to_csv('./경진대회/data/baseline.csv', index=False)
 
 
