@@ -88,7 +88,7 @@ print("dinner = ", model2.score(x_test_dinner, y_test_dinner))
 params = {
     'n_estimators':[100, 150, 175],
     'max_depth':[2 ,4 ,6, 8, 10, 12],
-    'min_samples_leaf':[2],
+    'min_samples_leaf':[2 ,4, 6, 8],
     'min_samples_split':[4]
 }
 
