@@ -94,11 +94,11 @@ params = {
 
 # RandomForestClassifier 객체 생성 후 GridSearchCV 수행
 # n_jobs = -1 을 지정하면 모든 CPU 코어를 이용해 학습 가능
-rf_clf = RandomForestClassifier(n_jobs=-1)
+rf_clf = RandomForestClassifier(n_jobs=-1)      
 grid_cv = GridSearchCV(rf_clf, param_grid = params, cv=2, n_jobs=-1)
 grid_cv.fit(x_train_lunch, y_train_lunch)
 
-print('최적의 하이퍼 파라미터 :',grid_cv.best_params_)
+print('최적의 하tp이퍼 파라미터 :',grid_cv.best_params_)
 print('최적의 예측 정확도 :',grid_cv.best_score_)
 
 np.set_printoptions(precision=1)
