@@ -64,8 +64,8 @@ y1_train = train['중식계']
 y2_train = train['석식계']
 x_test = test[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 
-model1 = RandomForestRegressor(n_estimators=400, max_features=4, n_jobs=-1, random_state=42, criterion='mae')
-model2 = RandomForestRegressor(n_estimators=400, max_features=5, n_jobs=-1, random_state=42, criterion='mae')
+model1 = RandomForestRegressor(n_estimators=400, max_features=4, n_jobs=-1, random_state=42, criterion='absolute_error')
+model2 = RandomForestRegressor(n_estimators=400, max_features=5, n_jobs=-1, random_state=42, criterion='absolute_error')
 
 # lunch에 대한 예측값
 x_train_lunch, x_test_lunch, y_train_lunch, y_test_lunch = train_test_split(x_train, y1_train, test_size=0.35, random_state=42)
@@ -86,10 +86,10 @@ print("dinner = ", model2.score(x_test_dinner, y_test_dinner))
 
 
 params = {
-    'n_estimators':[100, 200, 300],
+    'n_estimators':[100, 150, 175],
     'max_depth':[2 ,4 ,6, 8, 10, 12],
-    'min_samples_leaf':[2 ,4, 6, 8, 12, 18],
-    'min_samples_split':[2 ,4, 6, 8, 16, 20]
+    'min_samples_leaf':[2],
+    'min_samples_split':[4]
 }
 
 # RandomForestClassifier 객체 생성 후 GridSearchCV 수행
@@ -98,7 +98,7 @@ rf_clf = RandomForestClassifier(n_jobs=-1)
 grid_cv = GridSearchCV(rf_clf, param_grid = params, cv=2, n_jobs=-1)
 grid_cv.fit(x_train_lunch, y_train_lunch)
 
-print('최적의 하tp이퍼 파라미터 :',grid_cv.best_params_)
+print('최적의 하이퍼 파라미터 :',grid_cv.best_params_)
 print('최적의 예측 정확도 :',grid_cv.best_score_)
 
 np.set_printoptions(precision=1)
