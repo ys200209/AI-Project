@@ -8,6 +8,8 @@ from matplotlib import font_manager, rc
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 
+from sklearn.preprocessing import LabelEncoder
+import tensorflow as tf
 
 
 # train = pd.read_csv('C:\\Users\\Lee\\Desktop\\AI 응용 프로젝트\\경진대회\\data\\train.csv')
@@ -60,9 +62,53 @@ test = pd.get_dummies(test, columns = ['요일'])
 print("train = ", train)
 
 x_train = train[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_train = pd.DataFrame(x_train)
+x_test = train[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_test = pd.DataFrame(x_test)
+
+# 중식 Train 온 핫 인코딩
+Y_obj = train['중식메뉴']
+e = LabelEncoder()
+e.fit(Y_obj)
+Y = e.transform(Y_obj)
+y_encoded_lunch = tf.keras.utils.to_categorical(Y)
+x_train = pd.concat([x_train, pd.DataFrame(y_encoded_lunch)], axis=1)
+
+# 중식 Test 온 핫 인코딩
+Y_obj = test['중식메뉴']
+e = LabelEncoder()
+e.fit(Y_obj)
+Y = e.transform(Y_obj)
+y_encoded_lunch = tf.keras.utils.to_categorical(Y)
+x_test = pd.concat([x_test, pd.DataFrame(y_encoded_lunch)], axis=1)
+
+# 석식 Train 온 핫 인코딩
+Y_obj = train['석식메뉴']
+e = LabelEncoder()
+e.fit(Y_obj)
+Y = e.transform(Y_obj)
+y_encoded_dinner = tf.keras.utils.to_categorical(Y)
+x_train.append(pd.DataFrame(y_encoded_lunch))
+x_train = pd.concat([x_train, pd.DataFrame(y_encoded_lunch)], axis=1)
+
+# 석식 Test 온 핫 인코딩
+Y_obj = train['석식메뉴']
+e = LabelEncoder()
+e.fit(Y_obj)
+Y = e.transform(Y_obj)
+y_encoded_dinner = tf.keras.utils.to_categorical(Y)
+x_test.append(pd.DataFrame(y_encoded_lunch))
+x_test = pd.concat([x_test, pd.DataFrame(y_encoded_lunch)], axis=1)
+
+print("x_train.type = : ", type(x_train), " x_train : ", x_train)
+print("x_train.info() = ", x_train.info())
+# x_train = x_train.append(np.array(y_encoded_lunch))
+
 y1_train = train['중식계']
 y2_train = train['석식계']
 x_test = test[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_train = train[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+
 
 model1 = RandomForestRegressor(n_estimators=400, max_features=4, n_jobs=-1, random_state=42, criterion='absolute_error')
 model2 = RandomForestRegressor(n_estimators=400, max_features=5, n_jobs=-1, random_state=42, criterion='absolute_error')
@@ -73,23 +119,19 @@ x_train_lunch, x_test_lunch, y_train_lunch, y_test_lunch = train_test_split(x_tr
 # dinner에 대한 예측값
 x_train_dinner, x_test_dinner, y_train_dinner, y_test_dinner = train_test_split(x_train, y2_train, test_size=0.25, random_state=42)
 
-
-
-model1.fit(x_train_lunch, y_train_lunch)
-model2.fit(x_train_dinner, y_train_dinner)
-
+model1.fit(x_train, y1_train)
+model2.fit(x_train, y2_train)
 
 pred1 = model1.predict(x_test)
 pred2 = model2.predict(x_test)
 print("lunch = ", model1.score(x_test_lunch, y_test_lunch))
 print("dinner = ", model2.score(x_test_dinner, y_test_dinner))
 
-
 params = {
-    'n_estimators':[100, 150, 175],
-    'max_depth':[2 ,4 ,6, 8, 10, 12],
-    'min_samples_leaf':[2 ,4, 6, 8],
-    'min_samples_split':[4]
+    'n_estimators':[100, 150, 175], # 100 [100, 150, 175]
+    'max_depth':[2 ,4 ,6, 8, 10, 12], # 2 [2 ,4 ,6, 8, 10, 12]
+    'min_samples_leaf':[2 ,4, 6, 8, 12, 18], # 18 [2 ,4, 6, 8, 12, 18]
+    'min_samples_split':[4] # 4 [4]
 }
 
 # RandomForestClassifier 객체 생성 후 GridSearchCV 수행
