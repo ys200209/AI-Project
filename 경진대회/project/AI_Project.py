@@ -10,6 +10,7 @@ from sklearn.model_selection import GridSearchCV
 
 from sklearn.preprocessing import LabelEncoder
 import tensorflow as tf
+from sklearn.model_selection import StratifiedKFold
 
 
 # train = pd.read_csv('C:\\Users\\Lee\\Desktop\\AI 응용 프로젝트\\경진대회\\data\\train.csv')
@@ -88,7 +89,6 @@ e = LabelEncoder()
 e.fit(Y_obj)
 Y = e.transform(Y_obj)
 y_encoded_dinner = tf.keras.utils.to_categorical(Y)
-x_train.append(pd.DataFrame(y_encoded_lunch))
 x_train = pd.concat([x_train, pd.DataFrame(y_encoded_lunch)], axis=1)
 
 # 석식 Test 온 핫 인코딩
@@ -97,35 +97,47 @@ e = LabelEncoder()
 e.fit(Y_obj)
 Y = e.transform(Y_obj)
 y_encoded_dinner = tf.keras.utils.to_categorical(Y)
-x_test.append(pd.DataFrame(y_encoded_lunch))
 x_test = pd.concat([x_test, pd.DataFrame(y_encoded_lunch)], axis=1)
 
-print("x_train.type = : ", type(x_train), " x_train : ", x_train)
-print("x_train.info() = ", x_train.info())
 # x_train = x_train.append(np.array(y_encoded_lunch))
 
 y1_train = train['중식계']
 y2_train = train['석식계']
-x_test = test[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
-x_train = train[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 
 
 model1 = RandomForestRegressor(n_estimators=400, max_features=4, n_jobs=-1, random_state=42, criterion='absolute_error')
 model2 = RandomForestRegressor(n_estimators=400, max_features=5, n_jobs=-1, random_state=42, criterion='absolute_error')
 
+# K겹 교차 검증
+n_fold = 10
+skf = StratifiedKFold(n_splits=n_fold, shuffle=True, random_state=42)
+
+accuracy = []
+
+
+'''
+'''
+print("x_train.info() : ", x_train.info())
+print("x_test.info() : ", x_test.info())
 # lunch에 대한 예측값
-x_train_lunch, x_test_lunch, y_train_lunch, y_test_lunch = train_test_split(x_train, y1_train, test_size=0.35, random_state=42)
+x_train_lunch, x_test_lunch, y_train_lunch, y_test_lunch = train_test_split(x_train, y1_train, test_size=0.3, random_state=42)
 
 # dinner에 대한 예측값
-x_train_dinner, x_test_dinner, y_train_dinner, y_test_dinner = train_test_split(x_train, y2_train, test_size=0.25, random_state=42)
+x_train_dinner, x_test_dinner, y_train_dinner, y_test_dinner = train_test_split(x_train, y2_train, test_size=0.3, random_state=42)
 
-model1.fit(x_train, y1_train)
-model2.fit(x_train, y2_train)
+model1.fit(x_train_lunch, y_train_lunch) # lunch
+model2.fit(x_train_dinner, y_train_dinner) # dinner 
 
-pred1 = model1.predict(x_test)
-pred2 = model2.predict(x_test)
-print("lunch = ", model1.score(x_test_lunch, y_test_lunch))
-print("dinner = ", model2.score(x_test_dinner, y_test_dinner))
+
+pred1 = model1.predict(x_test_lunch)
+pred2 = model2.predict(x_test_dinner)
+
+print("pred1 : ", pred1)
+print("y_test_lunch : ", y_test_lunch)
+
+
+print("lunch = ", model1.score(x_test_lunch, pred1))
+print("dinner = ", model2.score(x_test_dinner, pred2))
 
 params = {
     'n_estimators':[100, 150, 175], # 100 [100, 150, 175]
