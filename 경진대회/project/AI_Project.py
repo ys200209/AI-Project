@@ -11,6 +11,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 import tensorflow as tf
 from sklearn.model_selection import StratifiedKFold
+import re
 
 
 # train = pd.read_csv('C:\\Users\\Lee\\Desktop\\AI 응용 프로젝트\\경진대회\\data\\train.csv')
@@ -64,19 +65,45 @@ print("train = ", train)
 
 x_train = train[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 x_train = pd.DataFrame(x_train)
-x_test = train[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_test = test[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 x_test = pd.DataFrame(x_test)
 
 # 중식 Train 온 핫 인코딩
-Y_obj = train['중식메뉴']
+'''
+Y_obj = [i[0] for i in train['중식메뉴']]
+print("Y_obj : ", Y_obj)
+e = LabelEncoder()
+e.fit(Y_obj)
+Y = e.transform(Y_obj)
+y_encoded_lunch = tf.keras.utils.to_categorical(Y)
+x_train = pd.concat([x_train, pd.DataFrame(y_encoded_lunch)], axis=1)
+'''
+
+lunch = []
+dinner = []
+
+# 중식 Train 온 핫 인코딩
+for i in train['중식메뉴']:
+    menu = re.sub(r"\([^)]*\)", '', i)
+    daily_lunch = menu.split(' ')[0]
+    lunch.append(daily_lunch)
+
+Y_obj = [i for i in lunch]
 e = LabelEncoder()
 e.fit(Y_obj)
 Y = e.transform(Y_obj)
 y_encoded_lunch = tf.keras.utils.to_categorical(Y)
 x_train = pd.concat([x_train, pd.DataFrame(y_encoded_lunch)], axis=1)
 
+lunch = []
+
 # 중식 Test 온 핫 인코딩
-Y_obj = test['중식메뉴']
+for i in test['중식메뉴']:
+    menu = re.sub(r"\([^)]*\)", '', i)
+    daily_lunch = menu.split(' ')[0]
+    lunch.append(daily_lunch)
+
+Y_obj = [i for i in lunch]
 e = LabelEncoder()
 e.fit(Y_obj)
 Y = e.transform(Y_obj)
@@ -84,20 +111,33 @@ y_encoded_lunch = tf.keras.utils.to_categorical(Y)
 x_test = pd.concat([x_test, pd.DataFrame(y_encoded_lunch)], axis=1)
 
 # 석식 Train 온 핫 인코딩
-Y_obj = train['석식메뉴']
+for i in train['석식메뉴']:
+    menu = re.sub(r"\([^)]*\)", '', i)
+    print("3 : ", len(menu), " menu : ", menu, " menu[0] : ", menu[0])
+    daily_dinner = menu.split(' ')[0]
+    dinner.append(daily_dinner)
+
+Y_obj = [i for i in dinner]
 e = LabelEncoder()
 e.fit(Y_obj)
 Y = e.transform(Y_obj)
 y_encoded_dinner = tf.keras.utils.to_categorical(Y)
-x_train = pd.concat([x_train, pd.DataFrame(y_encoded_lunch)], axis=1)
+x_train = pd.concat([x_train, pd.DataFrame(y_encoded_dinner)], axis=1)
+
+dinner = []
 
 # 석식 Test 온 핫 인코딩
-Y_obj = train['석식메뉴']
+for i in test['석식메뉴']:
+    menu = re.sub(r"\([^)]*\)", '', i)
+    daily_dinner = menu.split(' ')[0]
+    dinner.append(daily_dinner)
+
+Y_obj = [i for i in dinner]
 e = LabelEncoder()
 e.fit(Y_obj)
 Y = e.transform(Y_obj)
 y_encoded_dinner = tf.keras.utils.to_categorical(Y)
-x_test = pd.concat([x_test, pd.DataFrame(y_encoded_lunch)], axis=1)
+x_test = pd.concat([x_test, pd.DataFrame(y_encoded_dinner)], axis=1)
 
 # x_train = x_train.append(np.array(y_encoded_lunch))
 
@@ -105,8 +145,8 @@ y1_train = train['중식계']
 y2_train = train['석식계']
 
 
-model1 = RandomForestRegressor(n_estimators=400, max_features=4, n_jobs=-1, random_state=42, criterion='absolute_error')
-model2 = RandomForestRegressor(n_estimators=400, max_features=5, n_jobs=-1, random_state=42, criterion='absolute_error')
+model1 = RandomForestRegressor(n_estimators=200, n_jobs=-1, random_state=42, criterion='absolute_error')
+model2 = RandomForestRegressor(n_estimators=200, n_jobs=-1, random_state=42, criterion='absolute_error')
 
 # K겹 교차 검증
 n_fold = 10
@@ -117,8 +157,7 @@ accuracy = []
 
 '''
 '''
-print("x_train.info() : ", x_train.info())
-print("x_test.info() : ", x_test.info())
+
 # lunch에 대한 예측값
 x_train_lunch, x_test_lunch, y_train_lunch, y_test_lunch = train_test_split(x_train, y1_train, test_size=0.3, random_state=42)
 
@@ -128,17 +167,17 @@ x_train_dinner, x_test_dinner, y_train_dinner, y_test_dinner = train_test_split(
 model1.fit(x_train_lunch, y_train_lunch) # lunch
 model2.fit(x_train_dinner, y_train_dinner) # dinner 
 
-
-pred1 = model1.predict(x_test_lunch)
-pred2 = model2.predict(x_test_dinner)
-
-print("pred1 : ", pred1)
-print("y_test_lunch : ", y_test_lunch)
+# print("x_train.info() : ", x_train.info())
+# print("x_test.info() : ", x_test.info())
 
 
-print("lunch = ", model1.score(x_test_lunch, pred1))
-print("dinner = ", model2.score(x_test_dinner, pred2))
+pred1 = model1.predict(x_test)
+pred2 = model2.predict(x_test)
 
+# print("lunch = ", model1.score(x_test_lunch, y_test_lunch))
+# print("dinner = ", model2.score(x_test_dinner, y_test_dinner))
+
+'''
 params = {
     'n_estimators':[100, 150, 175], # 100 [100, 150, 175]
     'max_depth':[2 ,4 ,6, 8, 10, 12], # 2 [2 ,4 ,6, 8, 10, 12]
@@ -154,19 +193,11 @@ grid_cv.fit(x_train_lunch, y_train_lunch)
 
 print('최적의 하이퍼 파라미터 :',grid_cv.best_params_)
 print('최적의 예측 정확도 :',grid_cv.best_score_)
-
+'''
 np.set_printoptions(precision=1)
 pred1 = np.round(pred1, 0)
 pred2 = np.round(pred2, 0)
 
-'''
-rf_clf = RandomForestClassifier(random_state=0)
-rf_clf.fit(x_train_lunch, y_train_lunch)
-pred = rf_clf.predict(x_test_lunch)
-
-accuracy = accuracy_score(y_test_lunch, pred)
-print('랜덤 포레스트 정확도: {:.4f}'.format(accuracy))
-'''
 
 submission['중식계'] = pred1
 submission['석식계'] = pred2
