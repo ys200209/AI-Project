@@ -79,67 +79,45 @@ y_encoded_lunch = tf.keras.utils.to_categorical(Y)
 x_train = pd.concat([x_train, pd.DataFrame(y_encoded_lunch)], axis=1)
 '''
 
-lunch = []
-dinner = []
+daily_menu = [] # 여기에 Train, Test의 모든 점심, 저녁을 담아서 한번에 처리하도록.
 
 # 중식 Train 온 핫 인코딩
 for i in train['중식메뉴']:
     menu = re.sub(r"\([^)]*\)", '', i)
-    daily_lunch = menu.split(' ')[0]
-    lunch.append(daily_lunch)
-
-Y_obj = [i for i in lunch]
-e = LabelEncoder()
-e.fit(Y_obj)
-Y = e.transform(Y_obj)
-y_encoded_lunch = tf.keras.utils.to_categorical(Y)
-x_train = pd.concat([x_train, pd.DataFrame(y_encoded_lunch)], axis=1)
-
-lunch = []
+    daily_dinner = menu.split(' ')[0]
+    daily_menu.append(daily_dinner)
 
 # 중식 Test 온 핫 인코딩
 for i in test['중식메뉴']:
     menu = re.sub(r"\([^)]*\)", '', i)
     daily_lunch = menu.split(' ')[0]
-    lunch.append(daily_lunch)
-
-Y_obj = [i for i in lunch]
-e = LabelEncoder()
-e.fit(Y_obj)
-Y = e.transform(Y_obj)
-y_encoded_lunch = tf.keras.utils.to_categorical(Y)
-x_test = pd.concat([x_test, pd.DataFrame(y_encoded_lunch)], axis=1)
+    daily_menu.append(daily_lunch)
 
 # 석식 Train 온 핫 인코딩
 for i in train['석식메뉴']:
     menu = re.sub(r"\([^)]*\)", '', i)
-    print("3 : ", len(menu), " menu : ", menu, " menu[0] : ", menu[0])
     daily_dinner = menu.split(' ')[0]
-    dinner.append(daily_dinner)
-
-Y_obj = [i for i in dinner]
-e = LabelEncoder()
-e.fit(Y_obj)
-Y = e.transform(Y_obj)
-y_encoded_dinner = tf.keras.utils.to_categorical(Y)
-x_train = pd.concat([x_train, pd.DataFrame(y_encoded_dinner)], axis=1)
-
-dinner = []
+    daily_menu.append(daily_dinner)
 
 # 석식 Test 온 핫 인코딩
 for i in test['석식메뉴']:
     menu = re.sub(r"\([^)]*\)", '', i)
     daily_dinner = menu.split(' ')[0]
-    dinner.append(daily_dinner)
+    daily_menu.append(daily_dinner)
 
-Y_obj = [i for i in dinner]
+Y_obj = [i for i in daily_menu]
 e = LabelEncoder()
 e.fit(Y_obj)
 Y = e.transform(Y_obj)
 y_encoded_dinner = tf.keras.utils.to_categorical(Y)
+x_train = pd.concat([x_train, pd.DataFrame(y_encoded_dinner)], axis=1)
 x_test = pd.concat([x_test, pd.DataFrame(y_encoded_dinner)], axis=1)
 
-# x_train = x_train.append(np.array(y_encoded_lunch))
+x_train = x_train.dropna()
+x_test = x_test.dropna()
+
+print("x_train : ", x_train)
+print("x_test : ", x_test)
 
 y1_train = train['중식계']
 y2_train = train['석식계']
@@ -154,21 +132,21 @@ skf = StratifiedKFold(n_splits=n_fold, shuffle=True, random_state=42)
 
 accuracy = []
 
-
 '''
 '''
 
 # lunch에 대한 예측값
-x_train_lunch, x_test_lunch, y_train_lunch, y_test_lunch = train_test_split(x_train, y1_train, test_size=0.3, random_state=42)
+# x_train_lunch, x_test_lunch, y_train_lunch, y_test_lunch = train_test_split(x_train, y1_train, test_size=0.3, random_state=42)
 
 # dinner에 대한 예측값
-x_train_dinner, x_test_dinner, y_train_dinner, y_test_dinner = train_test_split(x_train, y2_train, test_size=0.3, random_state=42)
+# x_train_dinner, x_test_dinner, y_train_dinner, y_test_dinner = train_test_split(x_train, y2_train, test_size=0.3, random_state=42)
 
-model1.fit(x_train_lunch, y_train_lunch) # lunch
-model2.fit(x_train_dinner, y_train_dinner) # dinner 
+model1.fit(x_train, y1_train) # lunch
+model2.fit(x_train, y2_train) # dinner 
 
 # print("x_train.info() : ", x_train.info())
 # print("x_test.info() : ", x_test.info())
+
 
 
 pred1 = model1.predict(x_test)
@@ -203,5 +181,7 @@ submission['중식계'] = pred1
 submission['석식계'] = pred2
 
 submission.to_csv('./경진대회/data/baseline.csv', index=False)
+
+print("finish")
 
 
