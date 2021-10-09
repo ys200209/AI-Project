@@ -17,21 +17,17 @@ submission = pd.read_csv('./경진대회/data/sample_submission.csv')
 
 
 
-# train['요일'] = train['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
-print(pd.get_dummies(train, columns = ['요일']))
-
+train['요일'] = train['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
 train = pd.get_dummies(train, columns = ['요일'])
-# test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
 
+test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
 test = pd.get_dummies(test, columns = ['요일'])
-print(train.info())
-print(train.head(10))
 
-x_train = train[['요일_월', '요일_화', '요일_수', '요일_목', '요일_금', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_train = train[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 y1_train = train['중식계']
 y2_train = train['석식계']
 
-x_test = test[['요일_월', '요일_화', '요일_수', '요일_목', '요일_금', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
+x_test = test[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 
 
 model1 = RandomForestRegressor(n_jobs=-1, random_state=42)
@@ -49,7 +45,7 @@ pred2 = np.round(model2.predict(x_test), 1)
 submission['중식계'] = pred1
 submission['석식계'] = pred2
 
-submission.to_csv('./경진대회/data/ttttttttttest.csv', index=False)
+# submission.to_csv('./경진대회/data/ttttttttttest.csv', index=False)
 
 # x_train['요일'] = pd.get_dummies(x_train['요일'])
 
@@ -89,7 +85,6 @@ train['중식메뉴'] = le.transform(train['중식메뉴'])   #train['col']에 �
 # test['col'] = le.transform(test['col'])   #train['col']에 따라 encoding
 '''
 
-print("중식메뉴 : ")
 
 lunch = []
 daily_lunch = []
@@ -109,10 +104,10 @@ for i in range(3):
 for i in train['중식메뉴']:
     
     menu = re.sub(r"\([^)]*\)", '', i)
-    daily_lunch = menu.split()
+    daily_lunch = menu.split()[0]
     lunch.append(daily_lunch)
 
-# print("lunch = ", lunch)
+print("lunch = ", lunch)
 
 '''
 print("lunch.size = ", len(lunch[0]))
@@ -200,4 +195,3 @@ dataFrame_lunch = pd.DataFrame({
     'side_menu6':side_menu6
 })
 '''
-dataFrame_lunch.to_csv('./경진대회/data/lunch.csv', index=False)
