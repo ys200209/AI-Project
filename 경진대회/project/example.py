@@ -10,6 +10,7 @@ from sklearn.model_selection import GridSearchCV
 
 from sklearn.preprocessing import LabelEncoder
 import tensorflow as tf
+import re
 
 
 # train = pd.read_csv('C:\\Users\\Lee\\Desktop\\AI 응용 프로젝트\\경진대회\\data\\train.csv')
@@ -59,46 +60,50 @@ test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4
 train = pd.get_dummies(train, columns = ['요일'])
 test = pd.get_dummies(test, columns = ['요일'])
 
-print("train = ", train)
-
 x_train = train[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 x_train = pd.DataFrame(x_train)
 x_test = test[['요일_0', '요일_1', '요일_2', '요일_3', '요일_4', '본사정원수', '본사출장자수', '본사시간외근무명령서승인건수', '현본사소속재택근무자수']]
 x_test = pd.DataFrame(x_test)
 
+daily_menu = [] # 여기에 Train, Test의 모든 점심, 저녁을 담아서 한번에 처리하도록.
+
 # 중식 Train 온 핫 인코딩
-Y_obj = train['중식메뉴']
-e = LabelEncoder()
-e.fit(Y_obj)
-Y = e.transform(Y_obj)
-y_encoded_lunch = tf.keras.utils.to_categorical(Y)
-x_train = pd.concat([x_train, pd.DataFrame(y_encoded_lunch)], axis=1)
+for i in train['중식메뉴']:
+    menu = re.sub(r"\([^)]*\)", '', i)
+    # print("3 : ", len(menu), " menu : ", menu, " menu[0] : ", menu[0])
+    daily_dinner = menu.split(' ')[0]
+    daily_menu.append(daily_dinner)
 
 # 중식 Test 온 핫 인코딩
-Y_obj = test['중식메뉴']
-e = LabelEncoder()
-e.fit(Y_obj)
-Y = e.transform(Y_obj)
-y_encoded_lunch = tf.keras.utils.to_categorical(Y)
-x_test = pd.concat([x_test, pd.DataFrame(y_encoded_lunch)], axis=1)
+for i in test['중식메뉴']:
+    menu = re.sub(r"\([^)]*\)", '', i)
+    daily_lunch = menu.split(' ')[0]
+    daily_menu.append(daily_lunch)
 
 # 석식 Train 온 핫 인코딩
-Y_obj = train['석식메뉴']
+for i in train['석식메뉴']:
+    menu = re.sub(r"\([^)]*\)", '', i)
+    # print("3 : ", len(menu), " menu : ", menu, " menu[0] : ", menu[0])
+    daily_dinner = menu.split(' ')[0]
+    daily_menu.append(daily_dinner)
+
+# 석식 Test 온 핫 인코딩
+for i in test['석식메뉴']:
+    menu = re.sub(r"\([^)]*\)", '', i)
+    daily_dinner = menu.split(' ')[0]
+    daily_menu.append(daily_dinner)
+
+Y_obj = [i for i in daily_menu]
 e = LabelEncoder()
 e.fit(Y_obj)
 Y = e.transform(Y_obj)
 y_encoded_dinner = tf.keras.utils.to_categorical(Y)
 x_train = pd.concat([x_train, pd.DataFrame(y_encoded_dinner)], axis=1)
-
-# 석식 Test 온 핫 인코딩
-Y_obj = test['석식메뉴']
-e = LabelEncoder()
-e.fit(Y_obj)
-Y = e.transform(Y_obj)
-y_encoded_dinner = tf.keras.utils.to_categorical(Y)
 x_test = pd.concat([x_test, pd.DataFrame(y_encoded_dinner)], axis=1)
 
-# x_train = x_train.append(np.array(y_encoded_lunch))
+print("x_train : ", x_train.head(5))
+print("x_test : ", x_test.head(5))
+
 
 y1_train = train['중식계']
 y2_train = train['석식계']
