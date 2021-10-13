@@ -18,12 +18,22 @@ print()
 '''
 
 print("석식이 없는 행을 삭제하기 전 행의 수 : ", len(train))
-train_delete_row = train[train['석식계'] == 0.0].index
+train_delete_row = train[train['석식계'] == 0.0].index+1
 train = train.drop(train_delete_row)
 print("검열된 삭제 행 수 : ", train_delete_row.size)
 print("삭제를 마친 뒤 행의 수 : ", len(train))
+train = train.reset_index(drop=True)
 
-
+count = 0
+for i in train['석식계']:
+    if i == 0.0:
+        count+=1
+print("아직도 0인 석식계 : ", count)
+'''
+    if count >= 10:
+        break
+    count+=1
+'''
 # 메뉴에서 불필요한 문자 제거
 lunch = []
 for day in range(len(train)):
@@ -40,7 +50,9 @@ print("점심 메뉴 행의 수 : ", len(lunch))
 
 
 train['요일'] = train['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
+# train['요일'] = train['요일'].dropna()
 test['요일'] = test['요일'].map({'월':0, '화':1, '수':2, '목':3, '금':4})
+# test['요일'] = test['요일'].dropna()
 
 #year = [i[0] for i in train['일자'].str.split('-')]
 #month = [i[1] for i in train['일자'].str.split('-')]
@@ -56,8 +68,8 @@ test_month = pd.DataFrame({ '월': [i[1] for i in test['일자'].str.split('-')]
 test_day = pd.DataFrame({ '일': [i[2] for i in test['일자'].str.split('-')] })
 
 # 근무인원 피쳐추가 : 본사정원수 - ( 본사출장자수 + 본사휴가자수 + 현본사소속재택근무자수 )
-train_work_number = pd.DataFrame({ '근무인원': (train['본사정원수'] - ( train['본사출장자수'] + train['본사휴가자수'] + train['현본사소속재택근무자수'] ))})
-test_work_number = pd.DataFrame({ '근무인원': (test['본사정원수'] - ( test['본사출장자수'] + test['본사휴가자수'] + test['현본사소속재택근무자수'] ))})
+train_work_number = pd.DataFrame({ '근무인원': (train['본사정원수'] - ( train['본사휴가자수']+ train['본사출장자수'] + train['현본사소속재택근무자수'] ))})
+test_work_number = pd.DataFrame({ '근무인원': (test['본사정원수'] - ( test['본사휴가자수'] + test['본사출장자수'] + test['현본사소속재택근무자수'] ))})
 
 
 
@@ -76,14 +88,10 @@ for menu in lunch:
 
 # for menu in dinner
 
-print("밥의 행의 수 1 : ", len(lunch_rice))
-print("반찬의 행의 수 2 : ", len(lunch_main))
 
 lunch_rice = pd.DataFrame({ 'lunch_rice': lunch_rice })
 lunch_main = pd.DataFrame({ 'lunch_main': lunch_main })
 
-print("밥의 행의 수 1 : ", len(lunch_rice))
-print("반찬의 행의 수 2 : ", len(lunch_main))
 
 # x_train = train[['요일']]
 y1_train = train['중식계']
@@ -99,14 +107,33 @@ x_test = test[['요일']]
 
 # x_train = [[train['요일'], train_year, train_month, train_day, train_work_number, lunch_rice, lunch_main]]
 # x_test = [[test['요일'], test_year, test_month, test_day, test_work_number, lunch_rice, lunch_main]]
-x_train = pd.concat([train['요일'], train_year, train_month, train_day, train_work_number, lunch_rice, lunch_main], axis=1)
-x_test = pd.concat([test['요일'], test_year, test_month, test_day, test_work_number, lunch_rice, lunch_main], axis=1)
+x_train = pd.concat([train['요일'], train_year, train_month, train_day, train_work_number, train['본사시간외근무명령서승인건수'], lunch_rice, lunch_main], axis=1, ignore_index = True)
+x_test = pd.concat([test['요일'], test_year, test_month, test_day, test_work_number, test['본사시간외근무명령서승인건수'], lunch_rice, lunch_main], axis=1, ignore_index = True)
 
 
 print("len(train) : ", len(train))
 print("len(x_train) : ", len(x_train))
-x_train.dropna()
+x_train.dropna(axis=0)
 print("결측치를 제거한 뒤의 len(x_train) : ", len(x_train))
+
+
+# x_train = x_train.dropna()
+# x_train = x_train.reset_index(drop=True)
+
+print("x_train.loc(931) : ", x_train.loc[931])
+print("x_train.loc(932) : ", x_train.loc[932])
+print("x_train.loc(934) : ", x_train.loc[934])
+print("x_train.loc(933) : ", x_train.loc[933])
+
+
+'''
+i = 0
+for count in x_train['근무인원']:
+    print(i, " : ", count, " type : ", type(count))
+    if count == np.NaN:
+        print("nan...")
+    i+=1
+'''
 
 
 print("len(train['요일']) = ", len(train['요일']))
@@ -117,12 +144,6 @@ print("len(train_work_number) = ", len(train_work_number))
 print("len(rice) = ", len(lunch_rice))
 print("len(main) = ", len(lunch_main))
 
-
-
-print(x_train.head(3))
-print(x_test.head(3))
-
-print(x_train.info())
 
 
 
@@ -170,9 +191,17 @@ print("type(y1_train) : ", type(y1_train))
 print("len(x_train) : ", len(x_train))
 print("len(y1_train) : ", len(y1_train))
 
-print("x_train.loc(1000) : ", x_train.loc[1000])
+
+
+'''
+print("x_train.loc(0) : ", x_train.loc[[0]])
+print("x_train.loc(1000) : ", x_train.loc[[1000]])
 print("x_train.loc(1161) : ", x_train.loc[1161])
 print("x_train.loc(1162) : ", x_train.loc[1162])
+print("x_train.loc(1204) : ", x_train.loc[1204])
+'''
+
+
 
 lunch_model.fit(x_train, y1_train)
 dinner_model.fit(x_train, y2_train)
