@@ -30,8 +30,10 @@ train = train.reset_index(drop=True)
 lunch = []
 dinner = []
 train_lunch_rice = [] # 점심밥의 메뉴
+train_lunch_soup = [] # 점심국의 메뉴
 train_lunch_main = [] # 점심 메인 메뉴
 train_dinner_rice = [] # 저녁밥의 메뉴
+train_dinner_soup = [] # 저녁국의 메뉴
 train_dinner_main = [] # 저녁 메인 메뉴
 
 # Train 점심 메뉴
@@ -46,7 +48,11 @@ for day in range(len(train)):
 
 
 for menu in lunch: # 여기까지 train 파일 중식 가져오기
-    train_lunch_rice.append(menu[0])
+    if '쌀밥' in menu[0]:
+        train_lunch_rice.append('쌀밥')
+    else :
+        train_lunch_rice.append(menu[0])
+    train_lunch_soup.append(menu[1])
     train_lunch_main.append(menu[2])
 
 
@@ -65,28 +71,34 @@ for day in range(len(train)):
 print("dinner[0].len : ", len(dinner[0]))
 print("dinner : ", dinner)'''
 
-i=0
 for menu in dinner: # 여기까지 train 파일 석식 가져오기
     if len(menu) == 0:
         train_dinner_rice.append('None')
+        train_dinner_soup.append('None')
         train_dinner_main.append('None')
     elif '*' in menu: # (204번 인덱스에서 메뉴명이 '*' 인 행 발견)
         train_dinner_rice.append('None')
+        train_dinner_soup.append('None')
         train_dinner_main.append('None')
     elif '자기계발의날' in menu: # (315번 인덱스에서 메뉴명이 '자기계발의날' 인 행 발견)
         train_dinner_rice.append('None')
+        train_dinner_soup.append('None')
         train_dinner_main.append('None')
     elif '*자기계발의날*' in menu: # (339번 인덱스에서 메뉴명이 '*자기계발의날*' 인 행 발견)
         train_dinner_rice.append('None')
+        train_dinner_soup.append('None')
         train_dinner_main.append('None')
     elif '가정의날' in menu: # (358번 인덱스에서 메뉴명이 '가정의날' 인 행 발견)
         train_dinner_rice.append('None')
+        train_dinner_soup.append('None')
         train_dinner_main.append('None')
     elif '자기개발의날' in menu: # (702번 인덱스에서 메뉴명이 '자기개발의날' 인 행 발견)
         train_dinner_rice.append('None')
+        train_dinner_soup.append('None')
         train_dinner_main.append('None')
     else:
         train_dinner_rice.append(menu[0])
+        train_dinner_soup.append(menu[1])
         train_dinner_main.append(menu[2])
     
 
@@ -94,8 +106,10 @@ for menu in dinner: # 여기까지 train 파일 석식 가져오기
 lunch = []
 dinner = []
 test_lunch_rice = []
+test_lunch_soup = []
 test_lunch_main = []
 test_dinner_rice = []
+test_dinner_soup = []
 test_dinner_main = []
 
 # Test 점심 메뉴
@@ -110,6 +124,7 @@ for day in range(len(test)):
 
 for menu in lunch: # 여기까지 test 파일 중식 가져오기
     test_lunch_rice.append(menu[0])
+    test_lunch_soup.append(menu[1])
     test_lunch_main.append(menu[2])
 
 # Test 저녁 메뉴
@@ -123,7 +138,11 @@ for day in range(len(test)):
     dinner.append(tmp) 
 
 for menu in dinner: # 여기까지 test 파일 석식 가져오기
-    test_dinner_rice.append(menu[0])
+    if '쌀밥' in menu[0]:
+        test_dinner_rice.append('쌀밥')
+    else :
+        test_dinner_rice.append(menu[0])
+    test_dinner_soup.append(menu[1])
     test_dinner_main.append(menu[2])
 
 '''
@@ -179,15 +198,20 @@ x_test.columns = ['요일', '연', '월', '일', '근무인원', '야근수']
 print("len(train_lunch_rice) : ", len(train_lunch_rice))
 print("len(x_train) : ", len(x_train))
 
-
+# x_train = x_train.astype({'근무인원' : 'int'})
 x_train['lunch_rice'] = train_lunch_rice
+x_train['lunch_soup'] = train_lunch_soup
 x_train['lunch_main'] = train_lunch_main
 x_train['dinner_rice'] = train_dinner_rice
+x_train['dinner_soup'] = train_dinner_soup
 x_train['dinner_main'] = train_dinner_main
 
+# x_test = x_test.astype({'근무인원' : 'int'})
 x_test['lunch_rice'] = test_lunch_rice
+x_test['lunch_soup'] = test_lunch_soup
 x_test['lunch_main'] = test_lunch_main
 x_test['dinner_rice'] = test_dinner_rice
+x_test['dinner_soup'] = test_dinner_soup
 x_test['dinner_main'] = test_dinner_main
 
 
@@ -234,9 +258,10 @@ x_train = x_train.drop(train_delete_row)
 print("검열된 삭제 행 수 : ", train_delete_row.size)
 print("삭제를 마친 뒤 행의 수 : ", len(x_train))
 '''
+
 params = {
     'min_samples_leaf' :[10,12,15],
-    'n_estimators' : [200,300,450],
+    'n_estimators' : [200,300,450,600],
     'max_depth' : [1, 5, 10, 20],
     'max_features' : [ 0.2, 0.5, 0.8, 1]
 }
@@ -261,27 +286,45 @@ print("x_train.loc(1204) : ", x_train.loc[1204])
 # x_train = encoder.fit_transform(x_train)
 # x_test = encoder.fit_transform(x_test)
 
+# Train 요일 인코딩
+x_train['요일'] =  x_train['요일'].astype('category')
+x_train['요일'] = x_train.요일.cat.codes
 # Train 점심밥 인코딩
 x_train['lunch_rice'] = x_train['lunch_rice'].astype('category')
 x_train['lunch_rice'] = x_train.lunch_rice.cat.codes
+# Train 점심국 인코딩
+x_train['lunch_soup'] = x_train['lunch_soup'].astype('category')
+x_train['lunch_soup'] = x_train.lunch_soup.cat.codes
 # Train 점심반찬 인코딩
 x_train['lunch_main'] = x_train['lunch_main'].astype('category')
 x_train['lunch_main'] = x_train.lunch_main.cat.codes
 # Train 저녁밥 인코딩
 x_train['dinner_rice'] = x_train['dinner_rice'].astype('category')
 x_train['dinner_rice'] = x_train.dinner_rice.cat.codes
+# Train 저녁국 인코딩
+x_train['dinner_soup'] = x_train['dinner_soup'].astype('category')
+x_train['dinner_soup'] = x_train.dinner_soup.cat.codes
 # Train 저녁반찬 인코딩
 x_train['dinner_main'] = x_train['dinner_main'].astype('category')
 x_train['dinner_main'] = x_train.dinner_main.cat.codes
+# Test 요일 인코딩
+x_test['요일'] =  x_test['요일'].astype('category')
+x_test['요일'] = x_test.요일.cat.codes
 # Test 점심밥 인코딩
 x_test['lunch_rice'] = x_test['lunch_rice'].astype('category')
 x_test['lunch_rice'] = x_test.lunch_rice.cat.codes
+# Test 점심국 인코딩
+x_test['lunch_soup'] = x_test['lunch_soup'].astype('category')
+x_test['lunch_soup'] = x_test.lunch_soup.cat.codes
 # Test 점심반찬 인코딩
 x_test['lunch_main'] = x_test['lunch_main'].astype('category')
 x_test['lunch_main'] = x_test.lunch_main.cat.codes
 # Test 저녁밥 인코딩
 x_test['dinner_rice'] = x_test['dinner_rice'].astype('category')
 x_test['dinner_rice'] = x_test.dinner_rice.cat.codes
+# Test 저녁밥 인코딩
+x_test['dinner_soup'] = x_test['dinner_soup'].astype('category')
+x_test['dinner_soup'] = x_test.dinner_soup.cat.codes
 # Test 저녁반찬 인코딩
 x_test['dinner_main'] = x_test['dinner_main'].astype('category')
 x_test['dinner_main'] = x_test.dinner_main.cat.codes
@@ -296,27 +339,29 @@ print("x_test.info() : ", x_test.info())
 
 
 
-'''
 # 훈련
 lunch_model.fit(x_train, y1_train)
 dinner_model.fit(x_train, y2_train)
 
 lunch_best = lunch_model.best_score_
-lunch_model = lunch_model.best_estimator_
 dinner_best = dinner_model.best_score_
 
 
 print('점심 베이스라인 모델 에러값(mae) : ',lunch_best)
+print("점심 최적의 하이퍼 파라미터값 : ", lunch_model.best_estimator_)
+
 print('저녁 베이스라인 모델 에러값(mae) : ', dinner_best)
-
-
+print("저녁 최적의 하이퍼 파라미터값 : ", dinner_model.best_estimator_)
 
 pred1 = lunch_model.predict(x_test)
 pred2 = dinner_model.predict(x_test)
+
+
+
+
 '''
-'''
-model1 = RandomForestRegressor(n_jobs=-1, random_state=42)
-model2 = RandomForestRegressor(n_jobs=-1, random_state=42)
+model1 = RandomForestRegressor(n_jobs=-1, random_state=42, max_depth=10, max_features=0.8, min_samples_leaf=10, n_estimators=600)
+model2 = RandomForestRegressor(n_jobs=-1, random_state=42, max_depth=10, max_features=0.8, min_samples_leaf=10, n_estimators=600)
 
 
 model1.fit(x_train, y1_train)
@@ -324,11 +369,12 @@ model2.fit(x_train, y2_train)
 
 pred1 = model1.predict(x_test)
 pred2 = model2.predict(x_test)
-
+'''
 submission['중식계'] = pred1
 submission['석식계'] = pred2
 
-print("finish")
 
-submission.to_csv('baseline.csv', index=False)
-'''
+
+submission.to_csv('./경진대회/data/baseline.csv', index=False)
+
+print("finish")
