@@ -175,9 +175,6 @@ train_work_number = pd.DataFrame({ '근무인원': (train['본사정원수'] - (
 test_work_number = pd.DataFrame({ '근무인원': (test['본사정원수'] - ( test['본사휴가자수'] + test['본사출장자수'] + test['현본사소속재택근무자수'] ))})
 
 
-
-
-
 # x_train = train[['요일']]
 y1_train = train['중식계']
 y2_train = train['석식계']
