@@ -1,12 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns # matplotlib 라이브러리보다 좀 더 정교한 그래프를 그릴게끔 도와주는 seaborn 라이브러리.
+import seaborn as sns # matplotlib 라이브러리보다 좀 더 정교한 그래프를 그리게끔 도와주는 seaborn 라이브러리.
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 import numpy as np
 import tensorflow as tf
 
-'''
+
 df = pd.read_csv('./dataset/pima-indians-diabetes.csv',
                 names=["pregnant", "plasma", "pressure", "thickness", 
                 "insulin", "BMI", "predigree", "age", "class"])
@@ -15,11 +15,8 @@ df = pd.read_csv('./dataset/pima-indians-diabetes.csv',
 
 print(df.head(5)) # 해당 csv 파일의 첫 다섯 줄을 불러온다.
 
-print("----------------------------------------------------------------")
 
 print(df.info()) # 데이터의 전반적인 정보를 확인하는 .info() 함수
-
-print("----------------------------------------------------------------")
 
 print(df[['pregnant', 'class']].groupby(['pregnant'], 
             as_index=False).mean().sort_values(by="pregnant", ascending=True))
@@ -27,7 +24,6 @@ print(df[['pregnant', 'class']].groupby(['pregnant'],
 # 1. groupby() 함수를 사용해 임신 횟수 정보를 기준으로 하는 그룹을 생성.
 # 2. as_index=False 를 통해 pregnant 정보 옆에 새로운 인덱스를 생성.
 # 3. mean() 함수를 사용해 평균을 구하고 임신 횟수에 대한 오름차순 정렬로 정보를 가공한다.
-
 
 # 데이터 테이블을 그래프로 표현하기
 plt.figure(figsize=(12, 12)) # 그래프의 크기를 결정
@@ -48,7 +44,6 @@ grid = sns.FacetGrid(df, col="class")
 grid.map(plt.hist, "plasma", bins=10)
 plt.show()
 # 이 결과로 당뇨병이 발병한 사람의 공복 혈당 농도는 그렇지 않은 사람보다 150~200 의 수치가 매우 높았다.
-'''
 
 # seed 값 생성
 np.random.seed(3)
@@ -62,18 +57,20 @@ X = dataset[:, 0:8]
 Y = dataset[:, 8]
 
 # 모델의 설정
-model = Sequential()
-model.add(Dense(12, input_dim=8, activation="relu"))
-model.add(Dense(8, activation="relu"))
-model.add(Dense(1, activation="sigmoid"))
+model = Sequential() 
+model.add(Dense(12, input_dim=8, activation="relu")) # 8개의 피쳐를 input으로, 12개의 output을 가지는 입력층 생성
+model.add(Dense(8, activation="relu")) # 8개의 속성을 input으로 가지는 은닉층 생성
+model.add(Dense(1, activation="sigmoid")) 
+# 한개의 결과값을 가지는 결과층 생성. 결과는 둘중 하나를 가지는 sigmoid 활성화 함수를 사용
 
 # 모델 컴파일
-model.compile(loss="binary_crossentropy",
-                optimizer="adam",
-                metrics=["accuracy"])
+model.compile(loss="binary_crossentropy", # 오차 함수를 binary_crossentropy로 설정
+                optimizer="adam", # 최적화 함수를 adam 함수로 설정
+                metrics=["accuracy"]) # 결과값 출력방식을 accuracy로 설정
 
 # 모델 실행
-model.fit(X, Y, epochs=200, batch_size=10)
+model.fit(X, Y, epochs=200, batch_size=10) # X값과 그에 상응하는 결과 Y값을 데이터로 가지며 
+# 각 샘플을 200번 반복하고 한번 학습할 때 10개씩 학습하도록 설정
 
 # 결과 출력
 print("\n Accuracy: %.4f" % (model.evaluate(X, Y)[1]))
