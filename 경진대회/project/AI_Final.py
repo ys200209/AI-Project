@@ -184,8 +184,8 @@ y2_train = train['석식계']
 
 # 전처리로 생성된 피쳐 : 요일, 연, 월, 일, 실근무인원
 # x_train = pd.concat([x_train, train_year, train_month, train_day, train_work_number, lunch_rice, lunch_main], axis=1)
-
-# x_train = [[train['요일'], train_year, train_month, train_day, train_work_number, lunch_rice, lunch_main]]
+ 
+# x_train = [[train['요일'], train_year, train_month, train_day, train_work_number, lunch_rice, lunch_main]]p
 # x_test = [[test['요일'], test_year, test_month, test_day, test_work_number, lunch_rice, lunch_main]]
 x_train = pd.concat([train['요일'], train_year, train_month, train_day, train_work_number, train['본사시간외근무명령서승인건수']], axis=1, ignore_index = True)
 x_test = pd.concat([test['요일'], test_year, test_month, test_day, test_work_number, test['본사시간외근무명령서승인건수']], axis=1, ignore_index = True)
