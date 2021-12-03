@@ -142,8 +142,8 @@ for menu in dinner: # 여기까지 test 파일 석식 가져오기
         test_dinner_rice.append('쌀밥')
     else :
         test_dinner_rice.append(menu[0])
-    test_dinner_soup.append(menu[1])
-    test_dinner_main.append(menu[2])
+        test_dinner_soup.append(menu[1])
+        test_dinner_main.append(menu[2])
 
 '''
 train_lunch_rice = pd.DataFrame({ 'lunch_rice': train_lunch_rice })
