@@ -3,9 +3,10 @@ import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import seaborn as sns
-# import sweetviz as sv
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import RandomizedSearchCV
 
 
 from keras.models import Sequential
@@ -73,6 +74,21 @@ model.add(Dense(512, input_dim=3, activation="relu")) # 13개의 input과 30개�
 model.add(Dense(256, activation="relu")) # 50개의 input과 1개의 output으로 구성된 은닉층 생성
 model.add(Dense(256, activation="relu")) 
 model.add(Dense(1)) # 선형회귀는 출력층에 활성화함수를 입력하지 않는다.
+
+'''
+params = {
+    'min_samples_leaf' :[10,12,15],
+    'n_estimators' : [200,300,450,600],
+    'max_depth' : [1, 5, 10, 20],
+    'max_features' : [ 0.2, 0.5, 0.8, 1]
+}
+
+model_Forest = RandomForestRegressor()
+
+model = RandomizedSearchCV(model, params, scoring='neg_mean_absolute_error')
+
+'''
+
 
 model.compile(loss="mean_absolute_error", optimizer="adam") 
 
