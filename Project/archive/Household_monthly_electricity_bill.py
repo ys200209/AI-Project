@@ -67,10 +67,13 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3, random_
 
 
 model = Sequential()
-model.add(Dense(256, input_dim=9, activation="relu")) # 13개의 input과 30개의 output으로 구성된 입력층 생성
+model.add(Dense(256, input_dim=9, activation="relu")) 
 model.add(Dense(512, activation="relu")) 
 model.add(Dense(256, activation="relu")) 
 model.add(Dense(1)) 
+
+model.compile(loss="mean_absolute_error", optimizer="adam")
+model.fit(X_train, Y_train, epochs=500, batch_size=10)
 
 
 '''
@@ -88,9 +91,7 @@ model = RandomizedSearchCV(model, params, scoring='neg_mean_absolute_error')
 ''' 
 
 
-model.compile(loss="mean_absolute_error", optimizer="adam")
 
-model.fit(X_train, Y_train, epochs=600, batch_size=10)
 
 
 print("X = ", X)
